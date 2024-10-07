@@ -20,32 +20,39 @@ jobs:
         echo "File committed: $COMMIT_FILE"
         echo "::set-output name=commit_file::$COMMIT_FILE"
       
-    # Step 3: Delete previously downloaded Excel files
-    - name: Clean old Excel files
+    # Step 3: Clean up any previously downloaded Excel file
+    - name: Clean Up Previous Excel File
       run: |
-        rm -rf $GITHUB_WORKSPACE/downloaded-excel-files  # Remove the directory and old files
-        mkdir -p $GITHUB_WORKSPACE/downloaded-excel-files  # Recreate the directory for new file
+        if [ -d "$GITHUB_WORKSPACE/downloaded-excel-files" ]; then
+          rm -rf "$GITHUB_WORKSPACE/downloaded-excel-files"/*
+        fi
+
+    # Step 4: Copy Excel Files
+    - name: Copy Excel Files
+      run: |
+        mkdir -p "$GITHUB_WORKSPACE/downloaded-excel-files"  # Create the directory if it doesn't exist
+        cp -r "$GITHUB_WORKSPACE/Chandrashekhar/"* "$GITHUB_WORKSPACE/downloaded-excel-files/"
     
-    # Step 4: Download the committed Excel file for back-end processing
+    # Step 5: Download the committed Excel file for back-end processing
     - name: Download the Excel file
       run: |
         cp "$GITHUB_WORKSPACE/${{ steps.get_commit_file.outputs.commit_file }}" "$GITHUB_WORKSPACE/downloaded-excel-files/"
         echo "Excel file downloaded to common place: $GITHUB_WORKSPACE/downloaded-excel-files/"
     
-    # Step 5: Checkout the Zoho Task Creator repository
+    # Step 6: Checkout the Zoho Task Creator repository
     - name: Checkout Zoho Task Creator Repo
       uses: actions/checkout@v3
       with:
         repository: chandrashekhar54/GRL-Zoho-Insights   # Your Zoho repo details
         ref: TaskCreate                                 # The branch name
     
-    # Step 6: Build the Zoho Task Creator Console Application
+    # Step 7: Build the Zoho Task Creator Console Application
     - name: Build Zoho Task Creator
       run: |
         cd GRL-Zoho-Insights   # Navigate to your project directory
-        dotnet build                  # Build the console application
+        dotnet build          # Build the console application
     
-    # Step 7: Run the application using the committed Excel file as input
+    # Step 8: Run the application using the committed Excel file as input
     - name: Run the Zoho Task Creator
       run: |
         # Use the committed Excel file as input for the application
