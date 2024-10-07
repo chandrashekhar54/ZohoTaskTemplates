@@ -24,35 +24,39 @@ jobs:
     - name: Clean Up Previous Excel File
       run: |
         if [ -d "$GITHUB_WORKSPACE/downloaded-excel-files" ]; then
-          rm -rf "$GITHUB_WORKSPACE/downloaded-excel-files"/*
+          rm -rf "$GITHUB_WORKSPACE/downloaded-excel-files/*"  # Ensure the directory is cleaned up properly
         fi
-
-    # Step 4: Copy Excel Files
-    - name: Copy Excel Files
+    
+    # Step 4: Create the download directory
+    - name: Create Download Directory
       run: |
         mkdir -p "$GITHUB_WORKSPACE/downloaded-excel-files"  # Create the directory if it doesn't exist
+    
+    # Step 5: Copy Excel Files from a specific directory
+    - name: Copy Excel Files
+      run: |
         cp -r "$GITHUB_WORKSPACE/Chandrashekhar/"* "$GITHUB_WORKSPACE/downloaded-excel-files/"
     
-    # Step 5: Download the committed Excel file for back-end processing
+    # Step 6: Download the committed Excel file for back-end processing
     - name: Download the Excel file
       run: |
         cp "$GITHUB_WORKSPACE/${{ steps.get_commit_file.outputs.commit_file }}" "$GITHUB_WORKSPACE/downloaded-excel-files/"
         echo "Excel file downloaded to common place: $GITHUB_WORKSPACE/downloaded-excel-files/"
     
-    # Step 6: Checkout the Zoho Task Creator repository
+    # Step 7: Checkout the Zoho Task Creator repository
     - name: Checkout Zoho Task Creator Repo
       uses: actions/checkout@v3
       with:
         repository: chandrashekhar54/GRL-Zoho-Insights   # Your Zoho repo details
         ref: TaskCreate                                 # The branch name
     
-    # Step 7: Build the Zoho Task Creator Console Application
+    # Step 8: Build the Zoho Task Creator Console Application
     - name: Build Zoho Task Creator
       run: |
         cd GRL-Zoho-Insights   # Navigate to your project directory
         dotnet build          # Build the console application
     
-    # Step 8: Run the application using the committed Excel file as input
+    # Step 9: Run the application using the committed Excel file as input
     - name: Run the Zoho Task Creator
       run: |
         # Use the committed Excel file as input for the application
