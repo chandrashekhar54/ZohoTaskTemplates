@@ -1,0 +1,53 @@
+name: Trigger Zoho Task Creator on Excel Update
+
+on:
+  push:
+
+jobs:
+  checkout-and-trigger:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Checkout the repo containing the Excel templates
+    - name: Checkout Excel Repo
+      uses: actions/checkout@v3
+      
+    # Step 2: Get the Committed Excel file (only one file should be committed at a time)
+    - name: Get the Committed Excel file
+      id: get_commit_file
+      run: |
+        COMMIT_FILE=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})
+        echo "File committed: $COMMIT_FILE"
+        echo "::set-output name=commit_file::$COMMIT_FILE"
+      
+    # Step 3: Delete previously downloaded Excel files
+    - name: Clean old Excel files
+      run: |
+        rm -rf $GITHUB_WORKSPACE/downloaded-excel-files  # Remove the directory and old files
+        mkdir -p $GITHUB_WORKSPACE/downloaded-excel-files  # Recreate the directory for new file
+    
+    # Step 4: Download the committed Excel file for back-end processing
+    - name: Download the Excel file
+      run: |
+        cp "$GITHUB_WORKSPACE/${{ steps.get_commit_file.outputs.commit_file }}" "$GITHUB_WORKSPACE/downloaded-excel-files/"
+        echo "Excel file downloaded to common place: $GITHUB_WORKSPACE/downloaded-excel-files/"
+    
+    # Step 5: Checkout the Zoho Task Creator repository
+    - name: Checkout Zoho Task Creator Repo
+      uses: actions/checkout@v3
+      with:
+        repository: chandrashekhar54/GRL-Zoho-Insights   # Your Zoho repo details
+        ref: TaskCreate                                 # The branch name
+    
+    # Step 6: Build the Zoho Task Creator Console Application
+    - name: Build Zoho Task Creator
+      run: |
+        cd GRL-Zoho-Insights   # Navigate to your project directory
+        dotnet build                  # Build the console application
+    
+    # Step 7: Run the application using the committed Excel file as input
+    - name: Run the Zoho Task Creator
+      run: |
+        # Use the committed Excel file as input for the application
+        cd GRL-Zoho-Insights
+        dotnet run -- "$GITHUB_WORKSPACE/downloaded-excel-files/${{ steps.get_commit_file.outputs.commit_file }}"
