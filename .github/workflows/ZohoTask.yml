@@ -57,8 +57,12 @@ jobs:
         dotnet build          # Build the console application
     
     # Step 9: Run the application using the committed Excel file as input
+        # Step 7: Run the application using the committed Excel file as input
     - name: Run the Zoho Task Creator
       run: |
         # Use the committed Excel file as input for the application
         cd GRL-Zoho-Insights
         dotnet run -- "$GITHUB_WORKSPACE/downloaded-excel-files/${{ steps.get_commit_file.outputs.commit_file }}"
+      env:
+        DOWNLOADED_EXCEL_PATH: "$GITHUB_WORKSPACE/downloaded-excel-files/${{ steps.get_commit_file.outputs.commit_file }}"
+
