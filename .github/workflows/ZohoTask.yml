@@ -32,7 +32,7 @@ jobs:
       run: |
         mkdir -p "$GITHUB_WORKSPACE/downloaded-excel-files"  # Create the directory if it doesn't exist
     
-    # Step 5: Copy Excel Files from a specific directory
+    # Step 5: Copy Excel Files
     - name: Copy Excel Files
       run: |
         cp -r "$GITHUB_WORKSPACE/Chandrashekhar/"* "$GITHUB_WORKSPACE/downloaded-excel-files/"
@@ -40,15 +40,8 @@ jobs:
     # Step 6: Download the committed Excel file for back-end processing
     - name: Download the Excel file
       run: |
-        cp "$GITHUB_WORKSPACE/${{ steps.get_commit_file.outputs.commit_file }}" "$GITHUB_WORKSPACE/downloaded-excel-files/"
+        cp -r "$GITHUB_WORKSPACE/${{ steps.get_commit_file.outputs.commit_file }}" "$GITHUB_WORKSPACE/downloaded-excel-files/"
         echo "Excel file downloaded to common place: $GITHUB_WORKSPACE/downloaded-excel-files/"
-    
-    # Step 7: Checkout the Zoho Task Creator repository
-    - name: Checkout Zoho Task Creator Repo
-      uses: actions/checkout@v3
-      with:
-        repository: chandrashekhar54/GRL-Zoho-Insights   # Your Zoho repo details
-        ref: TaskCreate                                 # The branch name
     
     # Step 8: Build the Zoho Task Creator Console Application
     - name: Build Zoho Task Creator
