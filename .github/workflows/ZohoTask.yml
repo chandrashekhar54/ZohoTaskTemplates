@@ -8,53 +8,37 @@ on:
       - '**.xlsx' # Detect any Excel file changes in the repository
 
 jobs:
-  build-and-run:
+  run-task-automation:
     runs-on: ubuntu-latest
-    env: 
-      wrkng-dir: GRL-Zoho-Insights
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      - name: Checkout ZohoTaskTemplates repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
-    - name: Checkout GRL-Zoho-Insights
-      uses: actions/checkout@v3
-      with:
-          ref: TaskCreate
-          repository: chandrashekhar54/GRL-Zoho-Insights
-          path: ${{env.wrkng-dir}}
-          token: ${{ secrets.REPO_TOKEN }}
+      - name: Identify changed Excel files
+        run: |
+          git diff --name-only HEAD^ HEAD > changed_files.txt
+          cat changed_files.txt
 
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '7.0.x' # Adjust the version based on your project
-        
-    - name: Check which Excel file was changed
-      id: detect-excel-file
-      run: |
-        echo "Modified files:"
-        # Using GitHub provided context for before and sha
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep ".xlsx" || echo "No Excel files found"
-        MODIFIED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep ".xlsx")
-        if [[ -n "$MODIFIED_FILES" ]]; then
-         echo "Excel file(s) detected: $MODIFIED_FILES"
-         echo "excel_file_path=$MODIFIED_FILES" >> $GITHUB_ENV
-        else
-         echo "No Excel files detected."
-        fi
+      - name: Set file path
+        id: setpath
+        run: |
+          FILE=$(grep -E '\.xlsx$' changed_files.txt | head -n 1)
+          echo "::set-output name=filepath::$FILE"
 
-    - name: Check the present working directory
-      run: |
-       echo "Current working directory:"
-       pwd  
+      - name: Clone GRL-Zoho-Insights repo
+        run: |
+          git clone https://$GITHUB_ACTOR:${{ secrets.REPO_TOKEN }}@github.com/chandrashekhar54/GRL-Zoho-Insights.git
 
-    - name: Restore NuGet packages
-      run: dotnet restore GRL-Zoho-Insights/GRL-Zoho-Insights.csproj
-      working-directory: ${{env.wrkng-dir}}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dotnet-sdk-6.0
 
-    - name: Run the C# application
-      run: |
-        echo "Running C# Application with Excel File Path: ${{ env.excel_file_path }}"
-        dotnet run --project GRL-Zoho-Insights/GRL-Zoho-Insights.csproj -- "$excel_file_path"
-      working-directory: ${{env.wrkng-dir}}
+      - name: Run C# application with Excel file
+        run: |
+          cd GRL-Zoho-Insights
+          dotnet build
+          dotnet run -- "${{ steps.setpath.outputs.filepath }}"
