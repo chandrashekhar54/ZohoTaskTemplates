@@ -29,11 +29,7 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '7.0.x' # Adjust the version based on your project
-
-    - name: Restore NuGet packages
-      run: dotnet restore GRL-Zoho-Insights/GRL-Zoho-Insights.csproj
-      working-directory: ${{env.wrkng-dir}}
-
+        
     - name: Check which Excel file was changed
       id: detect-excel-file
       run: |
@@ -46,6 +42,10 @@ jobs:
         else
           echo "No Excel files detected."
         fi
+
+    - name: Restore NuGet packages
+      run: dotnet restore GRL-Zoho-Insights/GRL-Zoho-Insights.csproj
+      working-directory: ${{env.wrkng-dir}}
 
     - name: Run the C# application
       run: |
