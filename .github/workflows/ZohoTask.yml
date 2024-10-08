@@ -23,7 +23,7 @@ jobs:
           ref: TaskCreate
           repository: chandrashekhar54/GRL-Zoho-Insights
           path: ${{env.wrkng-dir}}
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.REPO_TOKEN }}
 
     - name: Set up .NET Core
       uses: actions/setup-dotnet@v3
