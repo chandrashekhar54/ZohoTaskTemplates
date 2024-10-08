@@ -1,61 +1,43 @@
-name: Trigger Zoho Task Creator on Excel Update
+name: Build and Run C# Application on Excel File Push
 
 on:
   push:
-
+   
 jobs:
-  checkout-and-trigger:
+  build-and-run:
     runs-on: ubuntu-latest
-    
-    steps:
-    # Step 1: Checkout the repo containing the Excel templates
-    - name: Checkout Excel Repo
-      uses: actions/checkout@v3
-      
-    # Step 2: Get the Committed Excel file (only one file should be committed at a time)
-    - name: Get the Committed Excel file
-      id: get_commit_file
-      run: |
-        COMMIT_FILE=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})
-        echo "File committed: $COMMIT_FILE"
-        echo "::set-output name=commit_file::$COMMIT_FILE"
-      
-    # Step 3: Clean up any previously downloaded Excel file
-    - name: Clean Up Previous Excel File
-      run: |
-        if [ -d "$GITHUB_WORKSPACE/downloaded-excel-files" ]; then
-          rm -rf "$GITHUB_WORKSPACE/downloaded-excel-files/*"  # Ensure the directory is cleaned up properly
-        fi
-    
-    # Step 4: Create the download directory
-    - name: Create Download Directory
-      run: |
-        mkdir -p "$GITHUB_WORKSPACE/downloaded-excel-files"  # Create the directory if it doesn't exist
-    
-    # Step 5: Copy Excel Files
-    - name: Copy Excel Files
-      run: |
-        cp -r "$GITHUB_WORKSPACE/chandrashekhar54/"* "$GITHUB_WORKSPACE/downloaded-excel-files/"
-    
-    # Step 6: Download the committed Excel file for back-end processing
-    - name: Download the Excel file
-      run: |
-        cp -r "$GITHUB_WORKSPACE/${{ steps.get_commit_file.outputs.commit_file }}" "$GITHUB_WORKSPACE/downloaded-excel-files/"
-        echo "Excel file downloaded to common place: $GITHUB_WORKSPACE/downloaded-excel-files/"
-    
-    # Step 8: Build the Zoho Task Creator Console Application
-    - name: Build Zoho Task Creator
-      run: |
-        cd GRL-Zoho-Insights   # Navigate to your project directory
-        dotnet build          # Build the console application
-    
-    # Step 9: Run the application using the committed Excel file as input
-        # Step 7: Run the application using the committed Excel file as input
-    - name: Run the Zoho Task Creator
-      run: |
-        # Use the committed Excel file as input for the application
-        cd GRL-Zoho-Insights
-        dotnet run -- "$GITHUB_WORKSPACE/downloaded-excel-files/${{ steps.get_commit_file.outputs.commit_file }}"
-      env:
-        DOWNLOADED_EXCEL_PATH: "$GITHUB_WORKSPACE/downloaded-excel-files/${{ steps.get_commit_file.outputs.commit_file }}"
 
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.0.x' # Adjust the version as per your project
+
+    - name: Restore NuGet packages
+      run: dotnet restore
+
+    - name: Detect Changed Excel File
+      id: detect_excel_file
+      run: |
+        echo "Checking for changed .xlsx files..."
+        CHANGED_FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.xlsx$' | head -n 1)
+        echo "Changed file: $CHANGED_FILE"
+        echo "::set-output name=excel_file::$CHANGED_FILE"
+      
+    - name: Fail if no Excel file was changed
+      if: steps.detect_excel_file.outputs.excel_file == ''
+      run: |
+        echo "Error: No Excel file detected in the recent push."
+        exit 1
+
+    - name: Build the C# Application
+      run: dotnet build --configuration Release
+
+    - name: Run the C# Application
+      run: dotnet run --project GRL-Zoho-Insights -- "$GITHUB_WORKSPACE/${{ steps.detect_excel_file.outputs.excel_file }}"
+
+    - name: Display Success Message
+      run: echo "C# Application executed successfully with the Excel file."
