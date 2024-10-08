@@ -10,14 +10,20 @@ on:
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
+    env: 
+      wrkng-dir: GRL-Zoho-Insights
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Clone C# Application Repository
-      run: git clone https://${{ secrets.GH_PAT }}@github.com/chandrashekhar54/GRL-Zoho-Insights.git
-      # Using the PAT from GitHub Secrets to authenticate the clone
+    - name: Checkout GRL-Zoho-Insights
+      uses: actions/checkout@v3
+      with:
+          ref: TaskCreate
+          repository: chandrashekhar54/GRL-Zoho-Insights
+          path: ${{env.wrkng-dir}}
+          token: ${{ secrets.GH_PAT }}
 
     - name: Set up .NET Core
       uses: actions/setup-dotnet@v3
@@ -26,6 +32,7 @@ jobs:
 
     - name: Restore NuGet packages
       run: dotnet restore GRL-Zoho-Insights/GRL-Zoho-Insights.csproj
+      working-directory: ${{env.wrkng-dir}}
 
     - name: Detect Changed Excel File
       id: detect_excel_file
@@ -34,6 +41,7 @@ jobs:
         CHANGED_FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.xlsx$' | head -n 1)
         echo "Changed file: $CHANGED_FILE"
         echo "::set-output name=excel_file::$CHANGED_FILE"
+        ##GET PATH OF XL FILE+
       
     - name: Fail if no Excel file was changed
       if: steps.detect_excel_file.outputs.excel_file == ''
@@ -41,11 +49,10 @@ jobs:
         echo "Error: No Excel file detected in the recent push."
         exit 1
 
-    - name: Build the C# Application
-      run: dotnet build --configuration Release GRL-Zoho-Insights/GRL-Zoho-Insights.csproj
+    - name: Build Zoho Automation Tool
+      run: dotnet build GRL-Zoho-Insights/GRL-Zoho-Insights.csproj --configuration Release <XL PATH>
+      working-directory: ${{env.wrkng-dir}}
 
-    - name: Run the C# Application
-      run: dotnet run --project GRL-Zoho-Insights -- "$GITHUB_WORKSPACE/${{ steps.detect_excel_file.outputs.excel_file }}"
-
-    - name: Display Success Message
-      run: echo "C# Application executed successfully with the Excel file."
+    - name: Run Zoho Automation Tool
+      run: dotnet run --project GRL-Zoho-Insights/GRL-Zoho-Insights.csproj <XL PATH>
+      working-directory: ${{env.wrkng-dir}}
