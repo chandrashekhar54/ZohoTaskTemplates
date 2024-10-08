@@ -15,7 +15,7 @@ jobs:
       - name: Checkout ZohoTaskTemplates repo
         uses: actions/checkout@v2
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Identify changed Excel files
         run: |
