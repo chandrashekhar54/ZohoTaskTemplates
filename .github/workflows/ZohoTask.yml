@@ -16,8 +16,8 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Clone C# Application Repository
-      run: git clone https://github.com/chandrashekhar54/GRL-Zoho-Insights.git
-      # If the repo is private, you may need to use a personal access token (PAT)
+      run: git clone https://${{ secrets.GH_PAT }}@github.com/chandrashekhar54/GRL-Zoho-Insights.git
+      # Using the PAT from GitHub Secrets to authenticate the clone
 
     - name: Set up .NET Core
       uses: actions/setup-dotnet@v3
