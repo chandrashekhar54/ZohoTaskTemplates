@@ -43,6 +43,11 @@ jobs:
           echo "No Excel files detected."
         fi
 
+    - name: Check the present working directory
+      run: |
+       echo "Current working directory:"
+       pwd  
+
     - name: Restore NuGet packages
       run: dotnet restore GRL-Zoho-Insights/GRL-Zoho-Insights.csproj
       working-directory: ${{env.wrkng-dir}}
