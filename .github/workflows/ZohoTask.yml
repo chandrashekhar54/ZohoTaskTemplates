@@ -6,13 +6,7 @@ on:
       - main # Adjust this based on your branch
     paths:
       - '**.xlsx' # Detect any Excel file changes in the repository
-
-  pull_request: # Trigger the workflow on pull request events
-     branches:
-      - main # Adjust this based on your branch
-     paths:
-      - '**.xlsx' # Detect any Excel file changes in the repository 
-
+      
 jobs:
   run-task-automation:
     runs-on: ubuntu-latest
