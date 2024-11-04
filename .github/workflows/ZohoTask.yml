@@ -37,11 +37,11 @@ jobs:
           ref: TaskCreate
           token: ${{ secrets.REPO_TOKEN }}
           fetch-depth: 1  # Limit history to the latest commit
-          submodules: false
 
       # 4. Navigate to the folder with .csproj and build the application
       - name: Run C# application with Excel file
         run: |
+        working-directory: GRL-Zoho-Insights/GRL-Zoho-Insights
           dotnet build
           dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"
 
