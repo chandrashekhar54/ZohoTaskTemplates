@@ -9,7 +9,7 @@ on:
       
 jobs:
   run-task-automation:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       # 1. Checkout ZohoTaskTemplates repo
@@ -23,19 +23,15 @@ jobs:
         run: |
           git diff --name-only HEAD^ HEAD > changed_files.txt
           cat changed_files.txt
-
       - name: Set file path
         id: setpath
         run: |
-          $FILE = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$' | Select-Object -First 1).Line
-          Write-Output "::set-output name=filepath::$FILE"
-
-
+          FILE=$(grep -E '\.xlsx$' changed_files.txt | head -n 1)
+          echo "::set-output name=filepath::$FILE"
       # 3. Checkout the GRL-Zoho-Insights repo on the TaskCreate branch
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
         run: |
           git clone --branch TaskCreate https://$GITHUB_ACTOR:${{ secrets.REPO_TOKEN }}@github.com/chandrashekhar54/GRL-Zoho-Insights.git
-
       # 4. Navigate to the folder with .csproj and build the application
       - name: Run C# application with Excel file
         run: |
