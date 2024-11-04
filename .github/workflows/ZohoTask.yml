@@ -9,7 +9,7 @@ on:
       
 jobs:
   run-task-automation:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       # 1. Checkout ZohoTaskTemplates repo
