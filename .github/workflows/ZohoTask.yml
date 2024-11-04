@@ -27,8 +27,9 @@ jobs:
       - name: Set file path
         id: setpath
         run: |
-          FILE=$(grep -E '\.xlsx$' changed_files.txt | head -n 1)
-          echo "::set-output name=filepath::$FILE"
+          $FILE = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$' | Select-Object -First 1).Line
+          Write-Output "::set-output name=filepath::$FILE"
+
 
       # 3. Checkout the GRL-Zoho-Insights repo on the TaskCreate branch
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
