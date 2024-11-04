@@ -31,12 +31,27 @@ jobs:
 
       # 3. Checkout the GRL-Zoho-Insights repo on the TaskCreate branch
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
-        run: |
-          git clone --branch TaskCreate --depth=1 https://$GITHUB_ACTOR:${{ secrets.REPO_TOKEN }}@github.com/chandrashekhar54/GRL-Zoho-Insights.git
+        uses: actions/checkout@v2
+        with:
+          repository: chandrashekhar54/GRL-Zoho-Insights
+          ref: TaskCreate
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-depth: 1  # Limit history to the latest commit
+          submodules: false
+
+      - name: Cache .NET packages
+        uses: actions/cache@v2
+        with:
+         path: ~/.nuget/packages
+         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+         restore-keys: |
+           ${{ runner.os }}-nuget-   
 
       # 4. Navigate to the folder with .csproj and build the application
       - name: Run C# application with Excel file
         run: |
-          cd GRL-Zoho-Insights/GRL-Zoho-Insights  # Navigate to the folder with the .csproj file
           dotnet build
-          dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"  # Adjust Excel file path based on current directory
+          dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"
+
+      
+     
