@@ -39,14 +39,6 @@ jobs:
           fetch-depth: 1  # Limit history to the latest commit
           submodules: false
 
-      - name: Cache .NET packages
-        uses: actions/cache@v2
-        with:
-         path: ~/.nuget/packages
-         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-         restore-keys: |
-           ${{ runner.os }}-nuget-   
-
       # 4. Navigate to the folder with .csproj and build the application
       - name: Run C# application with Excel file
         run: |
