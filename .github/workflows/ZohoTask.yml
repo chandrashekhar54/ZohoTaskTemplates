@@ -50,20 +50,20 @@ jobs:
       - name: Identify changed Excel files
         shell: powershell
         run: |
-          # Ensure you're in the right directory for the second repo
           cd ZohoTaskTemplates
           git diff --name-only HEAD^ HEAD > changed_files.txt
           $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
           Write-Output "Found file: $file"
-          # Set the full path for the Excel file
           $fullPath = Join-Path -Path "${{ github.workspace }}" -ChildPath "$file"
           echo "Excel file full path: $fullPath"
-          # Exporting the full path to be used in later steps
-          echo "EXCEL_FILE_PATH=$fullPath" >> $GITHUB_ENV
+          echo "EXCEL_FILE_PATH=$fullPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+          Write-Output "EXCEL_FILE_PATH set to: $fullPath"
 
       - name: Debug Excel File Path
         run: |
-           echo "Excel file path is: $env:EXCEL_FILE_PATH"
+          echo "Excel file path is: $env:EXCEL_FILE_PATH"
+        shell: powershell
+
 
 
       # Step 5: Run C# application with Excel file
