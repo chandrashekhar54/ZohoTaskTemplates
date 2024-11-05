@@ -37,27 +37,28 @@ jobs:
       - name: Identify changed Excel files
         shell: powershell
         run: |
-          cd ZohoTaskTemplates/ZohoTaskTemplates
+          cd ZohoTaskTemplates
           git diff --name-only HEAD^ HEAD > changed_files.txt
           $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
           Write-Output "Found file: $file"
-          $fullPath = Join-Path -Path "${{ github.workspace }}" -ChildPath "$file"
+          # Construct the full path based on the specified working directory
+          $baseDir = "C:\ZohoTaskRepo\actions-runner\_work\ZohoTaskTemplates\ZohoTaskTemplates"
+          $fullPath = Join-Path -Path $baseDir -ChildPath "$file"
           echo "Excel file full path: $fullPath"
           echo "EXCEL_FILE_PATH=$fullPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
           Write-Output "EXCEL_FILE_PATH set to: $fullPath"
 
+      # Step 5: Debug Excel File Path
       - name: Debug Excel File Path
         run: |
           echo "Excel file path is: $env:EXCEL_FILE_PATH"
         shell: powershell
 
-
-
-      # Step 5: Run C# application with Excel file
+      # Step 6: Run C# application with Excel file
       - name: Run C# application with Excel file
         shell: powershell
         run: |
-          # Navigate to the correct directory
+          # Navigate to the correct directory for the GRL-Zoho-Insights project
           cd GRL-Zoho-Insights/GRL-Zoho-Insights
           # Build the project
           dotnet build
