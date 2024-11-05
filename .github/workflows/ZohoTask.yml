@@ -26,11 +26,11 @@ jobs:
           Get-Content changed_files.txt
 
       - name: Identify changed Excel files
-        shell: pwsh
         run: |
-          $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
-          Write-Output "Found file: $file"
-          echo "::set-output name=filepath::$file"
+         $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
+         Write-Output "Found file: $file"
+         echo "::set-output name=filepath=$file"
+
 
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
         uses: actions/checkout@v2
