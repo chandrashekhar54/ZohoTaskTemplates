@@ -51,9 +51,10 @@ jobs:
       - name: Run C# application with Excel file
         shell: powershell
         run: |
-          # Navigate to the GRL-Zoho-Insights directory
-          cd GRL-Zoho-Insights
-          # Build the application
-          dotnet build
-          # Run the application using the full path from the environment variable
-          dotnet run -- "$env:EXCEL_FILE_PATH"
+           # Navigate to the correct directory
+           cd ZohoTaskTemplates/GRL-Zoho-Insights/GRL-Zoho-Insights
+           # Build the project
+           dotnet build
+           # Run the application using the full path from the environment variable
+           dotnet run -- "$env:EXCEL_FILE_PATH"
+
