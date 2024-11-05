@@ -37,7 +37,7 @@ jobs:
       - name: Identify changed Excel files
         shell: powershell
         run: |
-          cd ZohoTaskTemplates
+          cd ZohoTaskTemplates/ZohoTaskTemplates
           git diff --name-only HEAD^ HEAD > changed_files.txt
           $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
           Write-Output "Found file: $file"
