@@ -37,8 +37,12 @@ jobs:
           }
 
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
-        run: |
-          git clone --branch TaskCreate https://$GITHUB_ACTOR:${{ secrets.REPO_TOKEN }}@github.com/chandrashekhar54/GRL-Zoho-Insights.git
+        uses: actions/checkout@v2
+        with:
+          repository: chandrashekhar54/GRL-Zoho-Insights
+          ref: TaskCreate
+          token: ${{ secrets.REPO_TOKEN }}
+
 
       - name: Run C# application with Excel file
         shell: powershell
