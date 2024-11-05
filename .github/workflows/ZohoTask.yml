@@ -12,7 +12,20 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Step 1: Checkout GRL-Zoho-Insights repo
+      # Step 1: Clean up previous checkouts
+      - name: Clean up previous checkouts
+        shell: powershell
+        run: |
+          # Remove the GRL-Zoho-Insights directory if it exists
+          if (Test-Path -Path "GRL-Zoho-Insights") {
+            Remove-Item -Path "GRL-Zoho-Insights" -Recurse -Force
+          }
+          # Remove the ZohoTaskTemplates directory if it exists
+          if (Test-Path -Path "ZohoTaskTemplates") {
+            Remove-Item -Path "ZohoTaskTemplates" -Recurse -Force
+          }
+
+      # Step 2: Checkout GRL-Zoho-Insights repo
       - name: Checkout GRL-Zoho-Insights repo
         uses: actions/checkout@v2
         with:
@@ -22,17 +35,18 @@ jobs:
           fetch-depth: 0
           clean: true
 
-      # Step 2: Checkout ZohoTaskTemplates repo
+      # Step 3: Checkout ZohoTaskTemplates repo
       - name: Checkout ZohoTaskTemplates repo
         uses: actions/checkout@v2
         with:
           repository: chandrashekhar54/ZohoTaskTemplates
           token: ${{ secrets.REPO_TOKEN }}
           path: ZohoTaskTemplates  # Specify a different path
+          ref: TaskCreate          # Specify the branch to checkout
           fetch-depth: 0
           clean: true
 
-      # Step 3: Identify changed Excel files
+      # Step 4: Identify changed Excel files
       - name: Identify changed Excel files
         shell: powershell
         run: |
@@ -47,14 +61,13 @@ jobs:
           # Exporting the full path to be used in later steps
           echo "EXCEL_FILE_PATH=$fullPath" >> $GITHUB_ENV
 
-       # Step 4: Run C# application with Excel file
+      # Step 5: Run C# application with Excel file
       - name: Run C# application with Excel file
         shell: powershell
         run: |
-           # Navigate to the correct directory
-           cd GRL-Zoho-Insights/GRL-Zoho-Insights
-           # Build the project
-           dotnet build
-           # Run the application using the full path from the environment variable
-           dotnet run -- "$env:EXCEL_FILE_PATH"
-
+          # Navigate to the correct directory
+          cd GRL-Zoho-Insights/GRL-Zoho-Insights
+          # Build the project
+          dotnet build
+          # Run the application using the full path from the environment variable
+          dotnet run -- "$env:EXCEL_FILE_PATH"
