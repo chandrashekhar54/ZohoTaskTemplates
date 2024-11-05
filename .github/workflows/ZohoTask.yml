@@ -1,25 +1,35 @@
-name: Automated Zoho Task Creator
+name: Run Task Automation
 
 on:
   push:
     branches:
       - main
-    paths:
-      - '**.xlsx'
-      
+
 jobs:
   run-task-automation:
     runs-on: self-hosted
 
     steps:
+      # Step 1: Checkout GRL-Zoho-Insights repo
+      - name: Checkout GRL-Zoho-Insights repo
+        uses: actions/checkout@v2
+        with:
+          repository: chandrashekhar54/GRL-Zoho-Insights
+          token: ${{ secrets.REPO_TOKEN }}
+          path: GRL-Zoho-Insights
+          fetch-depth: 0
+          clean: true
+
+      # Step 2: Checkout ZohoTaskTemplates repo
       - name: Checkout ZohoTaskTemplates repo
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
           repository: chandrashekhar54/ZohoTaskTemplates
           token: ${{ secrets.REPO_TOKEN }}
+          fetch-depth: 0
           clean: true
 
+      # Step 3: Identify changed Excel files
       - name: Identify changed Excel files
         shell: powershell
         run: |
@@ -32,6 +42,7 @@ jobs:
           # Exporting the full path to be used in later steps
           echo "EXCEL_FILE_PATH=$fullPath" >> $GITHUB_ENV
 
+      # Step 4: Run C# application with Excel file
       - name: Run C# application with Excel file
         shell: powershell
         run: |
