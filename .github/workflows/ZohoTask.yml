@@ -38,10 +38,20 @@ jobs:
           ref: TaskCreate
           token: ${{ secrets.REPO_TOKEN }}
 
+      - name: Show current directory
+        run: |
+          Get-Location
+
+      - name: List files in current directory
+        run: |
+          Get-ChildItem -Recurse
+
       - name: Run C# application with Excel file
         shell: powershell
         run: |
           cd GRL-Zoho-Insights
           dotnet build
-          # Use the output variable directly without prepending ../../
-          dotnet run -- "${{ steps.setpath.outputs.filepath }}"
+          # Ensure the path is correct
+          $excelFilePath = "${{ steps.setpath.outputs.filepath }}"
+          Write-Output "Running with Excel file path: $excelFilePath"
+          dotnet run -- "$excelFilePath"
