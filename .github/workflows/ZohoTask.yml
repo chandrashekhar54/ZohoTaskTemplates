@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**.xlsx'
 
 jobs:
   run-task-automation:
@@ -16,7 +18,7 @@ jobs:
         with:
           repository: chandrashekhar54/GRL-Zoho-Insights
           token: ${{ secrets.REPO_TOKEN }}
-          path: GRL-Zoho-Insights
+          path: GRL-Zoho-Insights  # Specify a path to keep it organized
           fetch-depth: 0
           clean: true
 
@@ -26,6 +28,7 @@ jobs:
         with:
           repository: chandrashekhar54/ZohoTaskTemplates
           token: ${{ secrets.REPO_TOKEN }}
+          path: ZohoTaskTemplates  # Specify a different path
           fetch-depth: 0
           clean: true
 
@@ -33,20 +36,24 @@ jobs:
       - name: Identify changed Excel files
         shell: powershell
         run: |
+          # Ensure you're in the right directory for the second repo
+          cd ZohoTaskTemplates
           git diff --name-only HEAD^ HEAD > changed_files.txt
           $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
           Write-Output "Found file: $file"
           # Set the full path for the Excel file
-          $fullPath = Join-Path -Path "C:\ZohoTaskRepo\actions-runner\_work\ZohoTaskTemplates\ZohoTaskTemplates" -ChildPath $file
+          $fullPath = Join-Path -Path "${{ github.workspace }}" -ChildPath "$file"
           echo "Excel file full path: $fullPath"
           # Exporting the full path to be used in later steps
           echo "EXCEL_FILE_PATH=$fullPath" >> $GITHUB_ENV
 
-      # Step 4: Run C# application with Excel file
+       # Step 4: Run C# application with Excel file
       - name: Run C# application with Excel file
         shell: powershell
         run: |
+          # Navigate to the GRL-Zoho-Insights directory
           cd GRL-Zoho-Insights
+          # Build the application
           dotnet build
           # Run the application using the full path from the environment variable
           dotnet run -- "$env:EXCEL_FILE_PATH"
