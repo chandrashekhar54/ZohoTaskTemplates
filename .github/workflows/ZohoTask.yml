@@ -27,14 +27,9 @@ jobs:
 
       - name: Set file path
         id: setpath
-        shell: powershell
         run: |
-          $file = Select-String -Path changed_files.txt -Pattern '\.xlsx$' | Select-Object -First 1
-          if ($file -ne $null) {
-            echo "::set-output name=filepath::$($file.Line)"
-          } else {
-            echo "No .xlsx file changed"
-          }
+          FILE=$(grep -E '\.xlsx$' changed_files.txt | head -n 1)
+          echo "::set-output name=filepath::$FILE"
 
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
         uses: actions/checkout@v2
