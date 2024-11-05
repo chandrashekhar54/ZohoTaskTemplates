@@ -52,7 +52,7 @@ jobs:
         shell: powershell
         run: |
            # Navigate to the correct directory
-           cd ZohoTaskTemplates/GRL-Zoho-Insights/GRL-Zoho-Insights
+           cd GRL-Zoho-Insights/GRL-Zoho-Insights
            # Build the project
            dotnet build
            # Run the application using the full path from the environment variable
