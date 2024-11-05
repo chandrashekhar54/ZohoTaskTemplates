@@ -17,10 +17,16 @@ jobs:
         uses: actions/checkout@v3
 
       # 2. Identify the changed Excel file
+      # 2. Identify the changed Excel file
       - name: Identify changed Excel files
         run: |
+         if git rev-parse HEAD^ >/dev/null 2>&1; then
           git diff --name-only HEAD^ HEAD > changed_files.txt
-          cat changed_files.txt
+         else
+          echo "No previous commit to compare." > changed_files.txt
+         fi
+         cat changed_files.txt
+
           
       - name: Set file path
         id: setpath
