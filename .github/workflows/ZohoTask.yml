@@ -18,19 +18,18 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Identify changed Excel files
         shell: powershell
         run: |
           git diff --name-only HEAD^ HEAD > changed_files.txt
           Get-Content changed_files.txt
 
-      - name: Identify changed Excel files
+      - name: Set Excel file path
+        id: setpath
         run: |
-         $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
-         Write-Output "Found file: $file"
-         echo "::set-output name=filepath=$file"
-
+          $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
+          Write-Output "Found file: $file"
+          echo "::set-output name=filepath::$file"
 
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
         uses: actions/checkout@v2
@@ -39,10 +38,10 @@ jobs:
           ref: TaskCreate
           token: ${{ secrets.REPO_TOKEN }}
 
-
       - name: Run C# application with Excel file
         shell: powershell
         run: |
           cd GRL-Zoho-Insights
           dotnet build
-          dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"
+          # Use the output variable directly without prepending ../../
+          dotnet run -- "${{ steps.setpath.outputs.filepath }}"
