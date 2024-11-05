@@ -42,7 +42,7 @@ jobs:
           $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
           Write-Output "Found file: $file"
           # Construct the full path based on the specified working directory
-          $baseDir = "C:\ZohoTaskRepo\actions-runner\_work\ZohoTaskTemplates\ZohoTaskTemplates"
+          $baseDir = "C:\ZohoTaskRepo\actions-runner\_work\ZohoTaskTemplates\ZohoTaskTemplates\ZohoTaskTemplates"
           $fullPath = Join-Path -Path $baseDir -ChildPath "$file"
           echo "Excel file full path: $fullPath"
           echo "EXCEL_FILE_PATH=$fullPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
