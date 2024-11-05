@@ -25,13 +25,14 @@ jobs:
             Remove-Item -Path "ZohoTaskTemplates" -Recurse -Force
           }
 
-      # Step 2: Checkout GRL-Zoho-Insights repo
+      # Step 2: Checkout GRL-Zoho-Insights repo (with TaskCreate branch)
       - name: Checkout GRL-Zoho-Insights repo
         uses: actions/checkout@v2
         with:
           repository: chandrashekhar54/GRL-Zoho-Insights
           token: ${{ secrets.REPO_TOKEN }}
           path: GRL-Zoho-Insights  # Specify a path to keep it organized
+          ref: TaskCreate          # Specify the branch to checkout
           fetch-depth: 0
           clean: true
 
@@ -42,7 +43,6 @@ jobs:
           repository: chandrashekhar54/ZohoTaskTemplates
           token: ${{ secrets.REPO_TOKEN }}
           path: ZohoTaskTemplates  # Specify a different path
-          ref: TaskCreate          # Specify the branch to checkout
           fetch-depth: 0
           clean: true
 
