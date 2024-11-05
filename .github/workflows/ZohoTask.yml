@@ -9,24 +9,19 @@ on:
       
 jobs:
   run-task-automation:
-    runs-on: self-hosted  # or ubuntu-latest if it's compatible
-
+    runs-on: self-hosted
     steps:
       # 1. Checkout ZohoTaskTemplates repo
       - name: Checkout ZohoTaskTemplates repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Fetch full commit history
 
-      # 2. Identify the changed Excel file
       # 2. Identify the changed Excel file
       - name: Identify changed Excel files
         run: |
-         if git rev-parse HEAD^ >/dev/null 2>&1; then
           git diff --name-only HEAD^ HEAD > changed_files.txt
-         else
-          echo "No previous commit to compare." > changed_files.txt
-         fi
-         cat changed_files.txt
-
+          cat changed_files.txt
           
       - name: Set file path
         id: setpath
@@ -34,18 +29,20 @@ jobs:
           $FILE = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$' | Select-Object -First 1).Line
           Write-Output "::set-output name=filepath::$FILE"
 
-      # 3. Checkout GRL-Zoho-Insights repo on the TaskCreate branch
+      # 3. Checkout GRL-Zoho-Insights repo on the TaskCreate branch (within the same GitHub account)
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           repository: chandrashekhar54/GRL-Zoho-Insights
           ref: TaskCreate
           fetch-depth: 1
 
-      # 4. Build the Zoho Automation Tool
-      - name: Build Zoho Automation Tool
-        run: dotnet build GRL-Zoho-Insights/GRL-Zoho-Insights.csproj --configuration Release
+      # 4. Build the C# application
+      - name: Build C# application
+        working-directory: GRL-Zoho-Insights/GRL-Zoho-Insights  # Adjust to the actual path containing the .csproj file
+        run: dotnet build
 
-      # 5. Run the Zoho Automation Tool with the Excel file
-      - name: Run Zoho Automation Tool
-        run: dotnet run --project GRL-Zoho-Insights/GRL-Zoho-Insights.csproj -- "../../${{ steps.setpath.outputs.filepath }}"
+      # 5. Run the C# application with Excel file
+      - name: Run C# application with Excel file
+        working-directory: GRL-Zoho-Insights/GRL-Zoho-Insights  # Adjust to the actual path containing the .csproj file
+        run: dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"
