@@ -1,40 +1,48 @@
-name: Automated Zoho Task creater
+name: Automated Zoho Task Creator
 
 on:
-  push: # Trigger the workflow on push events
+  push:
     branches:
-      - main # Adjust this based on your branch
+      - main
     paths:
-      - '**.xlsx' # Detect any Excel file changes in the repository
+      - '**.xlsx'
       
 jobs:
   run-task-automation:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      # 1. Checkout ZohoTaskTemplates repo
+
       - name: Checkout ZohoTaskTemplates repo
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Fetch full commit history
+          fetch-depth: 0
 
-      # 2. Identify the changed Excel file
+
       - name: Identify changed Excel files
+        shell: powershell
         run: |
           git diff --name-only HEAD^ HEAD > changed_files.txt
-          cat changed_files.txt
+          Get-Content changed_files.txt
+
       - name: Set file path
         id: setpath
+        shell: powershell
         run: |
-          FILE=$(grep -E '\.xlsx$' changed_files.txt | head -n 1)
-          echo "::set-output name=filepath::$FILE"
-      # 3. Checkout the GRL-Zoho-Insights repo on the TaskCreate branch
+          $file = Select-String -Path changed_files.txt -Pattern '\.xlsx$' | Select-Object -First 1
+          if ($file -ne $null) {
+            echo "::set-output name=filepath::$($file.Line)"
+          } else {
+            echo "No .xlsx file changed"
+          }
+
       - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
         run: |
           git clone --branch TaskCreate https://$GITHUB_ACTOR:${{ secrets.REPO_TOKEN }}@github.com/chandrashekhar54/GRL-Zoho-Insights.git
-      # 4. Navigate to the folder with .csproj and build the application
+
       - name: Run C# application with Excel file
+        shell: powershell
         run: |
-          cd GRL-Zoho-Insights/GRL-Zoho-Insights  # Navigate to the folder with the .csproj file
+          cd GRL-Zoho-Insights/GRL-Zoho-Insights
           dotnet build
-          dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"  # Adjust Excel file path based on current directory
+          dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"
