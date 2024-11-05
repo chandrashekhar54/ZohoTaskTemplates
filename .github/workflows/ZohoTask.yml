@@ -61,6 +61,11 @@ jobs:
           # Exporting the full path to be used in later steps
           echo "EXCEL_FILE_PATH=$fullPath" >> $GITHUB_ENV
 
+      - name: Debug Excel File Path
+        run: |
+           echo "Excel file path is: $env:EXCEL_FILE_PATH"
+
+
       # Step 5: Run C# application with Excel file
       - name: Run C# application with Excel file
         shell: powershell
