@@ -47,6 +47,6 @@ jobs:
       - name: Run C# application with Excel file
         shell: powershell
         run: |
-          cd GRL-Zoho-Insights/GRL-Zoho-Insights
+          cd ZohoTaskTemplates\GRL-Zoho-Insights
           dotnet build
           dotnet run -- "../../${{ steps.setpath.outputs.filepath }}"
