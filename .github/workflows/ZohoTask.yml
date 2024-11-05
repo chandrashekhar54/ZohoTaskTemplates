@@ -12,46 +12,30 @@ jobs:
     runs-on: self-hosted
 
     steps:
-
       - name: Checkout ZohoTaskTemplates repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          repository: chandrashekhar54/ZohoTaskTemplates
+          token: ${{ secrets.REPO_TOKEN }}
+          clean: true
 
       - name: Identify changed Excel files
         shell: powershell
         run: |
           git diff --name-only HEAD^ HEAD > changed_files.txt
-          Get-Content changed_files.txt
-
-      - name: Set Excel file path
-        id: setpath
-        run: |
           $file = (Get-Content changed_files.txt | Select-String -Pattern '\.xlsx$').Line | Select-Object -First 1
           Write-Output "Found file: $file"
-          echo "::set-output name=filepath::$file"
-
-      - name: Checkout GRL-Zoho-Insights (TaskCreate branch)
-        uses: actions/checkout@v2
-        with:
-          repository: chandrashekhar54/GRL-Zoho-Insights
-          ref: TaskCreate
-          token: ${{ secrets.REPO_TOKEN }}
-
-      - name: Show current directory
-        run: |
-          Get-Location
-
-      - name: List files in current directory
-        run: |
-          Get-ChildItem -Recurse
+          # Set the full path for the Excel file
+          $fullPath = Join-Path -Path "C:\ZohoTaskRepo\actions-runner\_work\ZohoTaskTemplates\ZohoTaskTemplates" -ChildPath $file
+          echo "Excel file full path: $fullPath"
+          # Exporting the full path to be used in later steps
+          echo "EXCEL_FILE_PATH=$fullPath" >> $GITHUB_ENV
 
       - name: Run C# application with Excel file
         shell: powershell
         run: |
           cd GRL-Zoho-Insights
           dotnet build
-          # Ensure the path is correct
-          $excelFilePath = "${{ steps.setpath.outputs.filepath }}"
-          Write-Output "Running with Excel file path: $excelFilePath"
-          dotnet run -- "$excelFilePath"
+          # Run the application using the full path from the environment variable
+          dotnet run -- "$env:EXCEL_FILE_PATH"
